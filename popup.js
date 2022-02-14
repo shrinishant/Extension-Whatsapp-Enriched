@@ -150,6 +150,13 @@ const sendWMessage = async () => {
                 }
               }, 3000);
             }, 3000);
+=======
+              if(r2.arr_itr < result.con_arr.length){
+                chrome.runtime.sendMessage({greet_4: "scan_send"}, function(response) {
+                  console.log(response.farewell);
+                });
+              }
+            }, 200);
 
             break;
           }
@@ -190,6 +197,27 @@ const sendWMessage = async () => {
         sleep(1000);
     })
   })
+
+  function simulateMouseEvents(element, eventName)
+  {
+    const evt = new MouseEvent(eventName, {
+          "clientX" : 0,
+          "clientY" : 0,
+          "screenX" : 0,
+          "screenY" : 0,
+          "ctrlKey" : false,
+          "altKey" : false,
+          "shiftKey" : false,
+          "metaKey" : false,
+          "button" : 0,
+          "relatedTarget" : null,
+          "bubbles" : true,
+          "cancelable" : true
+      });
+      element.dispatchEvent(evt);
+  }
+    
+  simulateMouseEvents(document.querySelector('[title = "Search input textbox"]'), 'mousedown');
 }
 
 const scanMore = async () => {
