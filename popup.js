@@ -1,12 +1,25 @@
 var export_btn = document.getElementById("export");
 var more_btn = document.getElementById("more");
+var input_msg = document.getElementById('message');
+var msg_btn = document.getElementById('msg_btn');
 
 chrome.runtime.connect({ name: "huzayfah" });
 
+msg_btn.addEventListener('click', async () => {
+  chrome.storage.local.set({huza_msg: input_msg.value}, function() {});
+
+  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    function: sendWMessage,
+  });
+});
+
 more_btn.addEventListener('click', async () => {
 
-    more_btn.innerText = "Scan More...";
-    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  more_btn.innerText = "Scan More...";
+  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -22,6 +35,162 @@ export_btn.addEventListener('click', async () => {
     function: Export,
   });
 });
+
+const sendWMessage = async () => {
+
+  chrome.storage.local.get(['con_arr'], function(result){
+    chrome.storage.local.get(['arr_itr'], function(r2){
+
+      var div_height = document.getElementsByClassName('_3uIPm WYyr1');
+      var contact_rep = document.getElementsByClassName('_3OvU8');
+      var scroll_div = document.getElementById('pane-side');
+
+      var max_h = parseInt(div_height[0].style.height);
+
+      var searchScroll = true;
+
+        for(var i=0; i<contact_rep.length; i++){
+          if(contact_rep[i].firstElementChild.firstElementChild.firstElementChild.innerText === result.con_arr[r2.arr_itr]){
+            console.log("found", contact_rep[i].firstElementChild.firstElementChild.firstElementChild.innerText);
+            function simulateMouseEvents(element, eventName)
+            {
+                const evt = new MouseEvent(eventName, {
+                    "clientX" : 0,
+                    "clientY" : 0,
+                    "screenX" : 0,
+                    "screenY" : 0,
+                    "ctrlKey" : false,
+                    "altKey" : false,
+                    "shiftKey" : false,
+                    "metaKey" : false,
+                    "button" : 0,
+                    "relatedTarget" : null,
+                    "bubbles" : true,
+                    "cancelable" : true
+                });
+                element.dispatchEvent(evt);
+            }
+            var name = result.con_arr[r2.arr_itr]; 
+            simulateMouseEvents(document.querySelector('[title="' + name + '"]'), 'mousedown');
+            searchScroll = false;
+
+            r2.arr_itr = r2.arr_itr + 1;
+
+            if(r2.arr_itr > result.con_arr.length){
+              break;
+            }
+
+            const set_itr = async () => {
+              await chrome.storage.local.set({arr_itr: r2.arr_itr}, function() {});
+            }
+            set_itr();
+
+            const set_scroll = async () => {
+              r2.scroll_h = r2.scroll_h - 500;
+              await chrome.storage.local.set({scroll_h: r2.scroll_h}, function() {});
+            }
+            set_scroll();
+
+            setTimeout(() => {
+              chrome.storage.local.get(['huza_msg'], function (r4){
+                console.log(r4.huza_msg);
+                var eventFire = (MyElement, ElementType) => {
+
+                  var event = new MouseEvent(ElementType, {
+                      "clientX" : 0,
+                      "clientY" : 0,
+                      "screenX" : 0,
+                      "screenY" : 0,
+                      "ctrlKey" : false,
+                      "altKey" : false,
+                      "shiftKey" : false,
+                      "metaKey" : false,
+                      "button" : 0,
+                      "relatedTarget" : null,
+                      "bubbles" : true,
+                      "cancelable" : true
+                  });
+                  MyElement.dispatchEvent(event);
+                };
+                  
+                function myFunc()
+                {
+                  
+                    messageBox = document.querySelectorAll("[contenteditable='true']")[1];
+                  
+                    message = r4.huza_msg;
+                  
+                    counter = 1;
+                  
+                    for (i = 0; i < counter; i++) {
+                
+                        messageBox.innerHTML = message.replace(/ /gm, ''); // test it
+                
+                        var event = new UIEvent("input", {
+                            "bubbles" : true,
+                            "cancelable" : true,
+                            "view" : window,
+                            "detail" : 1
+                        });
+                
+                        messageBox.dispatchEvent(event);
+                  
+                        eventFire(document.querySelector('span[data-icon="send"]'), 'click');
+                    }
+                }
+                
+                myFunc();
+              });
+
+              setTimeout(() => {
+                if(r2.arr_itr < result.con_arr.length){
+                  chrome.runtime.sendMessage({greet_4: "scan_send"}, function(response) {
+                    console.log(response.farewell);
+                  });
+                }
+              }, 3000);
+            }, 3000);
+
+            break;
+          }
+        }
+
+        if(searchScroll){
+          chrome.storage.local.get(['scroll_h'], function(r3){
+            scroll_div.scroll(0, r3.scroll_h);
+
+            r3.scroll_h = r3.scroll_h + 500;
+
+            const set_scroll = async () => {
+              await chrome.storage.local.set({scroll_h: r3.scroll_h}, function() {});
+            }
+            set_scroll();
+
+            setTimeout(() => {
+              
+              if(max_h - r3.scroll_h  > 0){
+                chrome.runtime.sendMessage({greet_4: "scan_send"}, function(response) {
+                  console.log(response.farewell);
+                });
+              }
+          }, 200);
+        });
+        
+        }
+        
+        function sleep(milliseconds) {
+          var start = new Date().getTime();
+          for (var i = 0; i < 1e7; i++) {
+            if ((new Date().getTime() - start) > milliseconds){
+              break;
+            }
+          }
+        }
+        
+        sleep(1000);
+    })
+  })
+}
 
 const scanMore = async () => {
 
@@ -54,28 +223,31 @@ const scanMore = async () => {
 
     set_arr();
 
-    chrome.storage.local.get(['scroll_h'], function(result) {
+    setTimeout(() => {
+      chrome.storage.local.get(['scroll_h'], function(result) {
 
-      scroll_div.scroll(0, result.scroll_h);
-      console.log("scrolling", result.scroll_h);
-      result.scroll_h = result.scroll_h + 500;
-
-      const set_scroll = async () => {
-        await chrome.storage.local.set({scroll_h: result.scroll_h}, function() {});
-      }
-
-      set_scroll();
-    
-      if(max_h - result.scroll_h  > 0){
-        chrome.runtime.sendMessage({greeting: "scanM"}, function(response) {
-          console.log(response.farewell);
-        });
-      }else{
-        chrome.runtime.sendMessage({greet_2: "scanE"}, function(response) {
-          console.log(response.farewell);
-        });
-      }
-    });
+        scroll_div.scroll(0, result.scroll_h);
+        console.log("scrolling", result.scroll_h);
+        result.scroll_h = result.scroll_h + 500;
+  
+        const set_scroll = async () => {
+          await chrome.storage.local.set({scroll_h: result.scroll_h}, function() {});
+        }
+  
+        set_scroll();
+      
+        if(max_h - result.scroll_h  > 0){
+          chrome.runtime.sendMessage({greeting: "scanM"}, function(response) {
+            console.log(response.farewell);
+          });
+        }else{
+          scroll_div.scroll(0, 0);
+          chrome.runtime.sendMessage({greet_2: "scanE"}, function(response) {
+            console.log(response.farewell);
+          });
+        }
+      });
+    }, 100);
     
   });
 }
@@ -91,7 +263,16 @@ chrome.runtime.onMessage.addListener(
     }else if(request.greet_2 === "scanE"){
       document.getElementById('more').innerText = "Scan Ended";
       document.getElementById('more').style.backgroundColor = "red";
+      chrome.storage.local.set({scroll_h: 500}, function() {});
       sendResponse({farewell: "Scanning Ended"});
+    }else if(request.greet_3 === "sendMore"){
+      console.log("Fuck");
+      document.getElementById('msg_btn').click();
+      sendResponse({farewell: "Executing sending ..."});
+    }else if(request.greet_4 === "scan_send"){
+      console.log("Fuck");
+      document.getElementById('msg_btn').click();
+      sendResponse({farewell: "Scaning more for sending..."});
     }
   }
 );
