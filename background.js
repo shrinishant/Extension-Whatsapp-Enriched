@@ -6,7 +6,7 @@ chrome.storage.local.set({scroll_h: 500}, function() {});
 
 chrome.storage.local.set({huza_msg: ""}, function() {});
 
-chrome.storage.local.set({arr_itr: 1}, function() {});
+chrome.storage.local.set({arr_itr: 1}, function() { });
 
 chrome.runtime.onConnect.addListener(function(port) {
     if (port.name === "huzayfah") {
