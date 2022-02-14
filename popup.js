@@ -92,65 +92,6 @@ const sendWMessage = async () => {
             set_scroll();
 
             setTimeout(() => {
-              chrome.storage.local.get(['huza_msg'], function (r4){
-                console.log(r4.huza_msg);
-                var eventFire = (MyElement, ElementType) => {
-
-                  var event = new MouseEvent(ElementType, {
-                      "clientX" : 0,
-                      "clientY" : 0,
-                      "screenX" : 0,
-                      "screenY" : 0,
-                      "ctrlKey" : false,
-                      "altKey" : false,
-                      "shiftKey" : false,
-                      "metaKey" : false,
-                      "button" : 0,
-                      "relatedTarget" : null,
-                      "bubbles" : true,
-                      "cancelable" : true
-                  });
-                  MyElement.dispatchEvent(event);
-                };
-                  
-                function myFunc()
-                {
-                  
-                    messageBox = document.querySelectorAll("[contenteditable='true']")[1];
-                  
-                    message = r4.huza_msg;
-                  
-                    counter = 1;
-                  
-                    for (i = 0; i < counter; i++) {
-                
-                        messageBox.innerHTML = message.replace(/ /gm, ''); // test it
-                
-                        var event = new UIEvent("input", {
-                            "bubbles" : true,
-                            "cancelable" : true,
-                            "view" : window,
-                            "detail" : 1
-                        });
-                
-                        messageBox.dispatchEvent(event);
-                  
-                        eventFire(document.querySelector('span[data-icon="send"]'), 'click');
-                    }
-                }
-                
-                myFunc();
-              });
-
-              setTimeout(() => {
-                if(r2.arr_itr < result.con_arr.length){
-                  chrome.runtime.sendMessage({greet_4: "scan_send"}, function(response) {
-                    console.log(response.farewell);
-                  });
-                }
-              }, 3000);
-            }, 3000);
-=======
               if(r2.arr_itr < result.con_arr.length){
                 chrome.runtime.sendMessage({greet_4: "scan_send"}, function(response) {
                   console.log(response.farewell);
